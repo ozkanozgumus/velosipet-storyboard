@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Velosipet — Storyboard Takip Panosu (B01)</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{
+    --paper:#e9ecee; --paper-2:#f4f6f7; --paper-3:#dfe3e6;
+    --ink:#1a2127; --ink-soft:#5b6770; --ink-faint:#9aa4ac;
+    --rail:#1f272d; --rail-text:#e7eae8; --rule:#c7ccd0;
+    --sea:#0f6b70; --sea-soft:#d6e7e6; --terra:#c25430; --terra-soft:#f0ddd3; --amber:#caa23a;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --thumb-w: 104px; --thumb-h: 60px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  body{line-height:1.45}
+  a{color:var(--sea)}
+
+  header.topbar{position:sticky;top:0;z-index:40;background:var(--rail);color:var(--rail-text);
+    border-bottom:2px solid #11171b;display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:10px 18px}
+  .brand{display:flex;align-items:center;gap:11px;min-width:0}
+  .drop-glyph{width:22px;height:28px;flex:none}
+  .brand h1{font-size:14px;letter-spacing:.14em;text-transform:uppercase;margin:0;font-weight:700;white-space:nowrap}
+  .brand .sub{font-family:var(--mono);font-size:11px;color:#9fb0ad;letter-spacing:.08em}
+  .spacer{flex:1 1 auto}
+  .topbar .tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .search{display:flex;align-items:center;gap:7px;background:#2b343a;border:1px solid #3a454c;border-radius:6px;padding:6px 10px}
+  .search input{background:transparent;border:0;outline:0;color:var(--rail-text);font-family:var(--sans);font-size:13px;width:190px}
+  .search input::placeholder{color:#7d8a90}
+  .search svg{flex:none;opacity:.7}
+  .seg{display:flex;border:1px solid #3a454c;border-radius:6px;overflow:hidden}
+  .seg button{background:#2b343a;color:#b9c4c9;border:0;padding:6px 11px;font-size:12px;cursor:pointer;font-family:var(--sans)}
+  .seg button+button{border-left:1px solid #3a454c}
+  .seg button.active{background:var(--sea);color:#fff}
+  .btn{background:#2b343a;color:#cdd6da;border:1px solid #3a454c;border-radius:6px;padding:6px 11px;font-size:12px;cursor:pointer;font-family:var(--sans);white-space:nowrap}
+  .btn:hover{background:#343f46}
+  .btn svg{vertical-align:-2px;margin-right:5px;opacity:.8}
+  .odo{display:flex;align-items:center;gap:9px;background:#11171b;border:1px solid #333d43;border-radius:7px;padding:5px 11px}
+  .odo .num{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.04em;color:#fff}
+  .odo .num b{color:var(--sea)}
+  .odo .lbl{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#8893a0;line-height:1.1}
+  .odo .bar{width:60px;height:6px;border-radius:3px;background:#2b343a;overflow:hidden}
+  .odo .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--sea),#19a0a6);width:0}
+
+  main{max-width:1280px;margin:0 auto;padding:22px 18px 120px}
+  .act{margin:30px 0 8px;display:flex;align-items:center;gap:14px}
+  .act .lead{font-family:var(--mono);font-size:12px;color:var(--sea);letter-spacing:.12em;background:var(--sea-soft);border:1px solid #b9d6d4;padding:3px 8px;border-radius:5px}
+  .act h2{margin:0;font-size:15px;letter-spacing:.22em;text-transform:uppercase;font-weight:800;color:var(--ink)}
+  .act .rule{flex:1;height:2px;background:repeating-linear-gradient(90deg,var(--rule) 0 8px,transparent 8px 14px)}
+
+  .scene{margin:14px 0 26px;border:1px solid var(--rule);border-radius:9px;overflow:hidden;background:var(--paper-2);box-shadow:0 1px 0 rgba(0,0,0,.03)}
+  .scene-head{display:flex;align-items:center;gap:12px;background:var(--rail);color:var(--rail-text);padding:9px 14px}
+  .scene-head .code{font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.05em;background:#2c363c;border:1px solid #3c474e;border-radius:5px;padding:2px 8px}
+  .scene-head .loc{font-size:12.5px;letter-spacing:.04em;font-weight:600;color:#dfe6e4;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .scene-head .dur{font-family:var(--mono);font-size:11px;color:#9fb0ad;margin-left:auto;white-space:nowrap}
+  .scene-head .mini{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:#cfd8d6}
+  .scene-head .mini .dot{width:8px;height:8px;border-radius:50%;background:#3c474e}
+  .scene-head .mini .dot.full{background:var(--sea)}
+
+  .colhead,.shot{display:grid;grid-template-columns:84px 60px minmax(0,1fr) calc(var(--thumb-w)*3 + 24px) 34px;gap:0}
+  .colhead{background:#e0e4e7;border-bottom:1px solid var(--rule);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft)}
+  .colhead>div{padding:7px 12px}
+  .colhead .media-h{display:grid;grid-template-columns:repeat(3,var(--thumb-w));gap:12px;padding:7px 12px;justify-content:start}
+  .colhead .media-h span{text-align:center}
+
+  .shot{border-bottom:1px solid #e1e5e8;position:relative;transition:background .12s}
+  .shot:nth-child(odd of .shot){background:var(--paper-2)}
+  .shot:hover{background:#eef5f4}
+  .shot.dimmed{display:none}
+  .shot>div{padding:11px 12px;min-width:0}
+  .shot.custom{background:#fbf7ee}
+  .shot.custom:hover{background:#f6efe0}
+  .shot.custom:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--amber)}
+
+  .c-code{font-family:var(--mono);font-weight:700;font-size:12.5px;letter-spacing:.02em;color:var(--ink);display:flex;align-items:flex-start;gap:5px;flex-wrap:wrap}
+  .c-code .newtag{font-size:8px;background:var(--amber);color:#3a2f0c;border-radius:3px;padding:0 4px;letter-spacing:.06em;align-self:center}
+  .c-plan{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+  .c-plan .tag{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.03em;background:#e7edf0;border:1px solid #cfd6da;border-radius:4px;padding:1px 6px;color:#33414a}
+  .c-plan .sec{font-family:var(--mono);font-size:10px;color:var(--ink-faint)}
+  .c-body .move{font-family:var(--mono);font-size:10.5px;letter-spacing:.02em;color:var(--sea);margin-bottom:4px}
+  .c-body .action{font-size:13px;color:var(--ink)}
+  .c-body .audio{font-size:11.5px;color:var(--ink-soft);margin-top:4px}
+
+  .editable{outline:0;border-radius:4px;cursor:text;transition:background .1s,box-shadow .1s}
+  .editable:hover{background:rgba(15,107,112,.07);box-shadow:inset 0 -1px 0 rgba(15,107,112,.25)}
+  .editable:focus{background:#fff;box-shadow:0 0 0 2px rgba(15,107,112,.35)}
+  .editable.empty-field:not(:focus){color:var(--ink-faint);background:transparent;box-shadow:none}
+  [data-ph]:empty:before{content:attr(data-ph);color:var(--ink-faint);font-style:italic}
+  .shot.edited .c-code .editmark:after{content:"·düz";font-family:var(--mono);font-size:8.5px;color:var(--amber);letter-spacing:.04em;opacity:.85}
+
+  /* satır altı ekleme düğmesi */
+  .row-add{position:absolute;left:50%;bottom:-12px;transform:translateX(-50%);z-index:6;
+    width:24px;height:24px;border-radius:50%;border:1.5px solid var(--sea);background:#fff;color:var(--sea);
+    font-size:17px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;padding:0;
+    box-shadow:0 2px 6px rgba(0,0,0,.16)}
+  .shot:hover>.row-add{display:flex}
+  .row-add:hover{background:var(--sea);color:#fff}
+
+  .c-media{display:grid;grid-template-columns:repeat(3,var(--thumb-w));gap:12px;align-content:start;justify-content:start}
+  .slot-cell{display:flex;flex-direction:column;gap:4px;width:var(--thumb-w)}
+  .slot{width:var(--thumb-w);height:var(--thumb-h);border-radius:6px;position:relative;cursor:pointer;
+    border:1.5px dashed #c2cace;background:#eef1f3;display:flex;align-items:center;justify-content:center;overflow:hidden;
+    transition:border-color .12s,background .12s,transform .08s}
+  .slot:hover{border-color:var(--sea)}
+  .slot.drag{border-style:solid;border-color:var(--sea);background:var(--sea-soft);transform:scale(1.03)}
+  .slot.video{border-color:#d9c3b8}
+  .slot.video:hover{border-color:var(--terra)}
+  .slot .ph{display:flex;flex-direction:column;align-items:center;gap:3px;pointer-events:none;color:var(--ink-faint)}
+  .slot .ph span{font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+  .slot.filled{border-style:solid}
+  .slot img.thumb,.slot video.thumb{width:100%;height:100%;object-fit:cover;display:block}
+  .slot .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .slot .play svg{filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+  .slot .kill{position:absolute;top:3px;right:3px;width:17px;height:17px;border-radius:50%;background:rgba(20,26,30,.78);color:#fff;border:0;font-size:11px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;padding:0}
+  .slot.filled:hover .kill{display:flex}
+  .slot .tlabel{position:absolute;left:4px;bottom:3px;font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:#fff;background:rgba(20,26,30,.6);padding:0 4px;border-radius:3px}
+  .slot-tab{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;border:1px solid #d4dade;background:#eef1f3;
+    color:var(--ink-soft);border-radius:5px;padding:3px 4px;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;cursor:pointer}
+  .slot-tab:hover{border-color:var(--sea);color:var(--sea)}
+  .slot-tab .dot{width:7px;height:7px;border-radius:50%;background:#c2cace;flex:none}
+  .slot-tab.has{background:#fff7e3;border-color:#e6cf8f;color:#8a6d1e}
+  .slot-tab.has .dot{background:var(--amber)}
+
+  .c-note{display:flex;align-items:flex-start;justify-content:center}
+  .noteBtn{width:26px;height:30px;border:0;background:transparent;cursor:pointer;padding:0;position:relative}
+  .noteBtn svg{width:22px;height:28px}
+  .noteBtn .body{fill:#cdd5da;stroke:#aeb8bf;stroke-width:1}
+  .noteBtn.has .body{fill:var(--amber);stroke:#a8841f}
+  .noteBtn .cnt{position:absolute;top:-5px;right:-7px;background:var(--terra);color:#fff;font-size:9px;font-family:var(--mono);min-width:15px;height:15px;border-radius:8px;display:none;align-items:center;justify-content:center;padding:0 3px}
+  .noteBtn.has .cnt{display:flex}
+
+  .note-row{grid-column:1 / -1;display:none;padding:0 12px 14px 12px;background:#fbfaf4;border-top:1px dashed #e6dcc0}
+  .note-row.open{display:block}
+  .note-row .inner{padding-top:12px}
+  .np-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .np-field label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8a7a52;font-weight:700;display:flex;align-items:center;gap:6px}
+  .np-field.first label,.np-field.last label{color:#2f6f73}.np-field.video label{color:#a65331}
+  .np-field textarea{width:100%;margin-top:6px;min-height:66px;resize:vertical;border:1px solid #e2d8bd;border-radius:7px;background:#fffef9;
+    padding:9px 11px;font-family:var(--mono);font-size:12px;line-height:1.55;color:#3a3322;outline:0}
+  .np-field textarea:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(202,162,58,.16)}
+  .np-field.first textarea,.np-field.last textarea{background:#f7fbfb;border-color:#cfe4e3}
+  .np-field.first textarea:focus,.np-field.last textarea:focus{border-color:var(--sea);box-shadow:0 0 0 3px rgba(15,107,112,.14)}
+  .np-foot{display:flex;align-items:center;gap:14px;margin-top:9px;font-size:11px;color:#9a8c66}
+  .np-foot .saved{color:var(--sea)}
+  .np-foot .spacer{flex:1}
+  .np-reset,.np-delete{background:transparent;border:1px solid #e0d6bb;color:#9a8c66;border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer}
+  .np-reset:hover{border-color:var(--terra);color:var(--terra)}
+  .np-delete{border-color:#e6c3b6;color:#b25a39}
+  .np-delete:hover{background:#f7e7e0;border-color:var(--terra);color:var(--terra)}
+  .np-reset[hidden],.np-delete[hidden]{display:none}
+
+  .lb{position:fixed;inset:0;z-index:100;background:rgba(16,20,24,.82);display:none;align-items:center;justify-content:center;padding:30px}
+  .lb.open{display:flex}
+  .lb .box{max-width:min(1000px,92vw);max-height:90vh;display:flex;flex-direction:column;gap:12px}
+  .lb .stage{background:#0b0e10;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;max-height:74vh}
+  .lb img,.lb video{max-width:100%;max-height:74vh;display:block}
+  .lb .lbbar{display:flex;align-items:center;gap:10px;color:#dde3e6;font-family:var(--mono);font-size:12px;flex-wrap:wrap}
+  .lb .lbbar .name{opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:40vw}
+  .lb .lbbar .spacer{flex:1}
+  .lb .lbbtn{background:#222b30;color:#dde3e6;border:1px solid #3a454c;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:12px}
+  .lb .lbbtn.danger{background:#3a2420;border-color:#5a3328;color:#f0c9bd}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);opacity:0;background:#1f272d;color:#eaf0ef;padding:10px 16px;border-radius:8px;font-size:13px;z-index:120;transition:.22s;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,.3)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .empty-note{padding:40px;text-align:center;color:var(--ink-soft)}
+  input[type=file]{display:none}
+
+  @media (max-width:1080px){
+    .colhead,.shot{grid-template-columns:80px 56px minmax(0,1fr)}
+    .colhead .media-h,.c-media,.c-note{grid-column:1 / -1}
+    .c-media{padding-top:0;margin-top:2px;border-top:1px dashed #e1e5e8}
+    .c-note{justify-content:flex-start}
+    .colhead .media-h{display:none}
+    .np-grid{grid-template-columns:1fr}
+  }
+  @media print{.topbar,.slot .kill,.noteBtn,.slot-tab,.row-add{display:none}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg class="drop-glyph" viewBox="0 0 22 28" aria-hidden="true">
+      <path d="M11 1 C 11 1, 20 12, 20 19 A 9 9 0 1 1 2 19 C 2 12, 11 1, 11 1 Z" fill="#2bb3b8" stroke="#13888d" stroke-width="1.2"/>
+      <path d="M7 18 a4 4 0 0 0 4 4" fill="none" stroke="#bff0f1" stroke-width="1.4" stroke-linecap="round"/>
+    </svg>
+    <div><h1>Velosipet ile Bir Cevelan</h1><div class="sub">STORYBOARD · B01 — “İki Teker, Bir Sır”</div></div>
+  </div>
+  <div class="spacer"></div>
+  <div class="tools">
+    <div class="odo" title="İlk kare · son kare · video — üçü de eklenmiş çekimler">
+      <div class="bar"><i id="odoBar"></i></div>
+      <div><div class="num"><b id="odoDone">0</b>/<span id="odoTotal">0</span></div><div class="lbl">tam çekim</div></div>
+    </div>
+    <div class="search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="q" type="search" placeholder="Çekim, replik, mekân ara…" autocomplete="off">
+    </div>
+    <div class="seg" id="filter">
+      <button data-f="all" class="active">Tümü</button>
+      <button data-f="todo">Eksik</button>
+      <button data-f="notes">Notlu</button>
+    </div>
+    <button class="btn" id="backupBtn" title="Notlar, promptlar, metin düzenlemeleri, eklenen çekimler ve medya — JSON olarak indir">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M5 21h14"/></svg>Yedek al
+    </button>
+    <button class="btn" id="restoreBtn" title="Daha önce alınan yedeği geri yükle">Yedek yükle</button>
+  </div>
+</header>
+
+<main id="board"><div class="empty-note">Yükleniyor…</div></main>
+
+<input type="file" id="pick-image" accept="image/*">
+<input type="file" id="pick-video" accept="video/*">
+<input type="file" id="restoreFile" accept="application/json,.json">
+
+<div class="lb" id="lb">
+  <div class="box">
+    <div class="stage" id="lbStage"></div>
+    <div class="lbbar">
+      <span class="name" id="lbName"></span><span class="spacer"></span>
+      <button class="lbbtn" id="lbReplace">Değiştir</button>
+      <button class="lbbtn" id="lbDownload">İndir</button>
+      <button class="lbbtn danger" id="lbRemove">Kaldır</button>
+      <button class="lbbtn" id="lbClose">Kapat ✕</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== VERİ ===================== */
+const STORYBOARD = {"acts":[{"title":"SOĞUK AÇILIŞ","scenes":[{"code":"SA","header":"DIŞ. İSTANBUL SOKAKLARI — ŞAFAK (Soğuk Açılış)","duration":"~0:55","shots":[{"shot":"SA-01","plan":"GP","move":"Üst açı, hafif TILT-DOWN","action":"Şafak vakti, boş ve eğimli İstanbul sokağı; uzakta Ahmet'in velosipeti belirir.","audio":"SFX: kuş sesi, sabah sessizliği","sec":"5"},{"shot":"SA-02","plan":"BEL","move":"TAKİP (yandan DOLLY)","action":"Ahmet pedalda, kendinden geçmiş; boynunda siklometre tıkırdar.","audio":"AHMET: “Yokuş yok, rüzgâr yok… Rıfkı'nın rekorunu kıracağız!”","sec":"8"},{"shot":"SA-03","plan":"DETAY","move":"SABİT (insert)","action":"Siklometre ibresi titriyor, hızla sayar.","audio":"SFX: tık-tık-tık","sec":"3"},{"shot":"SA-04","plan":"BP","move":"TAKİP","action":"Ahmet pedalı kökler, hızlanır.","audio":"AHMET: “Hesabı basit!”","sec":"5"},{"shot":"SA-05","plan":"GP","move":"SABİT","action":"Köşeyi döner, yeni kurulan pazarın ortasına dalar; tezgâhlar, küfeler, bakır kaplar.","audio":"SFX: pazar curcunası yükselir","sec":"5"},{"shot":"SA-06","plan":"BEL","move":"Hızlı PAN","action":"Manav kollarını savurur.","audio":"MANAV: “Çocuuuk! Domateslerim!”","sec":"4"},{"shot":"SA-07","plan":"GP","move":"TAKİP + WHIP PAN","action":"Ahmet domates piramidinin çevresinden kıvrılır; piramit devrilir, kırmızı bir çağlayan.","audio":"SFX: gümbürtü, yuvarlanan domates","sec":"7"},{"shot":"SA-08","plan":"BEL","move":"Hızlı kesmeler / TAKİP","action":"Hamalın küfesi altından geçer, kediden atlar, asılı tavuğa toslamaktan kurtulur.","audio":"SFX: curcuna, miyav","sec":"7"},{"shot":"SA-09","plan":"DETAY","move":"SABİT (insert)","action":"Siklometre: “BİR KİLOMETRE.”","audio":"SFX: tık… tık","sec":"3"},{"shot":"SA-10","plan":"BP","move":"Alt açı","action":"Ahmet kolunu havaya kaldırır, zafer.","audio":"AHMET: “Bir kilometre! Duydun mu dünya? Bir kilome—”","sec":"5"},{"shot":"SA-11","plan":"GP","move":"SABİT (reveal)","action":"Önünde sokağı kapatan dev SU FIÇISI belirir.","audio":"SFX: gerilim vurgusu","sec":"3"},{"shot":"SA-12","plan":"YP","move":"SABİT","action":"Ahmet'in yüzü sönükleşir.","audio":"AHMET: “…tre.”","sec":"3"},{"shot":"SA-13","plan":"GP","move":"SABİT","action":"ŞAPLAK! Ahmet velosipetiyle fıçıya gömülür; bir tüy suya konar; sessizlik.","audio":"SFX: büyük su sıçraması, sonra sessizlik","sec":"7"},{"shot":"SA-14","plan":"YP","move":"SABİT","action":"Ahmet sudan başını çıkarır, gülümser; ağzından su akar.","audio":"AHMET: “…Rekor yine de bizde.”","sec":"5"},{"shot":"SA-15","plan":"BEL","move":"TAKİP","action":"Manav süpürgeyle gelir; Ahmet fıçıdan fırlar, velosipeti omuzlar, kaçar.","audio":"MANAV: “Gel buraya!” / AHMET: “Akşama parasını getiririm! Belki!”","sec":"7"}]},{"code":"JEN","header":"JENERİK — “İki Teker, Bir Sır” (stok, ~0:30)","duration":"~0:30","shots":[{"shot":"JEN","plan":"—","move":"Stok jenerik dizisi","action":"Açılış teması; karakter/lokomotif tanıtım kolajı (tüm bölümlerde ortak).","audio":"MÜZİK: jenerik şarkısı","sec":"30"}]}]},{"title":"1. PERDE","scenes":[{"code":"1A","header":"İÇ. RIFKI'NIN EVİ — SABAH (1. Perde)","duration":"~0:50","shots":[{"shot":"1A-01","plan":"GP","move":"SABİT","action":"Sıcacık, dağınık mutfak; börekler, pekmez, asılı sucuklar.","audio":"SFX: ev sıcaklığı, tıkırtı","sec":"4"},{"shot":"1A-02","plan":"YP","move":"Hafif üst açı","action":"Rıfkı kocaman simidi katman katman peynirle istifliyor, gözleri yarı kapalı.","audio":"RIFKI: “Bir kat peynir… bir kat daha… belki bir kat zeytin…”","sec":"7"},{"shot":"1A-03","plan":"GP","move":"SABİT (ani)","action":"PAT! Kapı ardına kadar açılır; sırılsıklam Ahmet haritayla içeri dalar.","audio":"SFX: kapı çarpması","sec":"4"},{"shot":"1A-04","plan":"BEL","move":"Göz hizası","action":"Ahmet, ayakkabılarından su damlayarak.","audio":"AHMET: “Rıfkı! Hayatının en büyük fikrini buldum!”","sec":"4"},{"shot":"1A-05","plan":"YP","move":"SABİT","action":"Rıfkı gözünü simitten ayırmaz.","audio":"RIFKI: “Senin en büyük fikrin geçen sefer beni damda bırakmıştı.”","sec":"7"},{"shot":"1A-06","plan":"BEL","move":"Hafif DOLLY-IN","action":"Ahmet haritayı masaya serer, gözleri parlar.","audio":"AHMET: “Bursa'ya gidiyoruz! İki velosipet, bir yol, koca bir macera!”","sec":"5"},{"shot":"1A-07","plan":"DETAY","move":"YAVAŞ ÇEKİM (insert)","action":"Rıfkı'nın elindeki simit yere düşer; bir damla peynir.","audio":"SFX: yavaş düşüş","sec":"4"},{"shot":"1A-08","plan":"YP","move":"SABİT","action":"Rıfkı dehşetle.","audio":"RIFKI: “Bursa mı? Vapur, dağ, yokuş… ayı bile olabilir!” / AHMET: “Ayı yok. …Muhtemelen.”","sec":"8"},{"shot":"1A-09","plan":"OMUZ","move":"SABİT (ikna modu)","action":"Ahmet iki elini masaya dayar, gözleri ışıldar.","audio":"AHMET: “Buz gibi pınarlar, dağ ardı vadiler… ve bir sürü—”","sec":"7"},{"shot":"1A-10","plan":"YP","move":"SABİT","action":"Rıfkı'nın bir gözü açılır; ağzı sulanır.","audio":"RIFKI: “…bir sürü ne?” / AHMET: “Yemek. İnegöl köftesi, üç köy öteden kokar.”","sec":"8"},{"shot":"1A-11","plan":"BEL→GP","move":"TILT-DOWN (liste açılır)","action":"Rıfkı upuzun erzak listesini açar, yere kadar uzar.","audio":"RIFKI: “Bir haftalık erzak listesi…” / AHMET: “Bu liste değil, bir halı.”","sec":"8"},{"shot":"1A-12","plan":"YP","move":"SABİT","action":"Ahmet teslim, gülümser.","audio":"RIFKI: “Halı geliyor ya da ben gelmiyorum.” / AHMET: “…Halı geliyor.”","sec":"5"}]},{"code":"1B","header":"DIŞ. SABRİ USTA'NIN DÜKKÂNI — GÜNDÜZ (1. Perde)","duration":"~0:18","shots":[{"shot":"1B-01","plan":"GP","move":"SABİT","action":"Eğri tabela: “SABRİ USTA — VELOSİPET TAMİR VE İCAT.” Vitrinde acayip makineler.","audio":"SFX: sokak, çın çın zil","sec":"5"},{"shot":"1B-02","plan":"BP","move":"DOLLY-IN (kapı)","action":"Çocuklar girer; kapı zili öter.","audio":"SFX: kapı zili","sec":"4"},{"shot":"1B-03","plan":"BEL","move":"Göz hizası","action":"Sabri Usta bir tekerleği yağlıyor, gözlüğünün üstünden bakar.","audio":"RIFKI: “Bana sağlam, frenli bir tane lazım usta. Çok frenli.”","sec":"7"},{"shot":"1B-04","plan":"OMUZ","move":"SABİT","action":"Usta gülümser.","audio":"SABRİ USTA: “Frenden çok korkanlar, en hızlı gidecek olanlardır.”","sec":"8"}]},{"code":"1C","header":"İÇ. DÜKKÂN — DEFTER (1. Perde)","duration":"~1:00","shots":[{"shot":"1C-01","plan":"BEL","move":"Hafif DOLLY-IN","action":"Usta ikisini süzer; gözü Ahmet'in meraklı yüzünde oyalanır, yumuşar.","audio":"MÜZİK: yumuşak, anlamlı tını","sec":"7"},{"shot":"1C-02","plan":"YP","move":"SABİT","action":"Usta yavaşça konuşur.","audio":"SABRİ USTA: “Sende tanıdık bir bakış var. Yıllar önce, tam senin gibi meraklı biri vardı.”","sec":"9"},{"shot":"1C-03","plan":"YP","move":"SABİT","action":"Ahmet merakla.","audio":"AHMET: “Kimmiş o?” / SABRİ USTA: “…Eski bir hikâye.”","sec":"7"},{"shot":"1C-04","plan":"BP","move":"TILT-UP (takip)","action":"Usta taburesine çıkıp en üst raftan tozlu, deri kaplı eski DEFTERİ indirir; tozunu üfler.","audio":"SFX: toz üfleme","sec":"7"},{"shot":"1C-05","plan":"OMUZ","move":"SABİT","action":"Usta defteri iki eliyle Ahmet'e uzatır.","audio":"SABRİ USTA: “Bu defter çok yol gördü. Sahibini bekledi. Sanırım o sahip artık sensin.”","sec":"11"},{"shot":"1C-06","plan":"DETAY","move":"SABİT (insert)","action":"Ahmet defteri açar: solmuş çizimler, yarım haritalar; kenarlarda tekrarlayan DAMLA işareti.","audio":"SFX: sayfa hışırtısı","sec":"7"},{"shot":"1C-07","plan":"DETAY","move":"ZOOM-IN","action":"Bir damla simgesi yakına gelir (anlatı işareti — twist tohumu).","audio":"MÜZİK: gizem motifi belirir","sec":"4"},{"shot":"1C-08","plan":"YP","move":"SABİT","action":"Ahmet bir satırda durur, parmağıyla izler.","audio":"AHMET: “Burada bir şey yazıyor: ‘Beyaz kelebekler suda uçar.’”","sec":"8"},{"shot":"1C-09","plan":"BEL","move":"SABİT","action":"Gizemli, yarım bir EZGİ duyulur; Rıfkı ürperir, kollarını ovuşturur.","audio":"RIFKI: “Suda uçan kelebek mi? Bu defter hiç hoşuma gitmedi.” / MÜZİK: gizem","sec":"8"},{"shot":"1C-10","plan":"YP","move":"SABİT","action":"Ahmet ustaya döner.","audio":"AHMET: “Ne demek bu usta? Nereye götürüyor?”","sec":"5"},{"shot":"1C-11","plan":"BP","move":"TAKİP (kapıya)","action":"Usta kapıya yönelir, omzunun üstünden bakar.","audio":"SABRİ USTA: “Onu ben söyleyemem. Yol söyler. Asıl fren, senin aklındır.”","sec":"11"},{"shot":"1C-12","plan":"DETAY","move":"SABİT (insert)","action":"Defter, Ahmet'in ellerinde sanki biraz daha ağırlaşır.","audio":"MÜZİK: motif iner","sec":"4"}]},{"code":"1D","header":"DIŞ. DÜKKÂN ÖNÜ — DEVAM (1. Perde)","duration":"~0:27","shots":[{"shot":"1D-01","plan":"GP","move":"SABİT","action":"İki velosipet hazır: Ahmet'inki derli toplu/aletli, Rıfkı'nınki tıka basa heybeli.","audio":"SFX: tatlı zil tınısı","sec":"5"},{"shot":"1D-02","plan":"YP","move":"SABİT","action":"Duvarda tünemiş KARATAVUK (Zil), parlak gözleriyle zile bakar.","audio":"ZİL: “Tıngır.”","sec":"4"},{"shot":"1D-03","plan":"BEL","move":"TAKİP (hızlı)","action":"Kuş süzülüp bisikletten parlak bir cıvatayı gagalar, Ahmet'in omzuna konar.","audio":"SFX: pırıltı, kanat","sec":"5"},{"shot":"1D-04","plan":"BEL","move":"SABİT","action":"Rıfkı kollarını sallar.","audio":"RIFKI: “Hişt! Git! O cıvata bizim, onsuz tekerlek düşer!”","sec":"5"},{"shot":"1D-05","plan":"YP","move":"SABİT","action":"Zil kımıldamaz, başını eğip cevap verir gibi.","audio":"ZİL: “Tıngır.” / AHMET (güler): “Bırak kalsın. Bir yol arkadaşımız daha oldu.”","sec":"7"},{"shot":"1D-06","plan":"BEL","move":"SABİT","action":"Rıfkı yenik.","audio":"RIFKI: “Bir kuş, bir defter, suda uçan kelebekler. Daha ne eksik?”","sec":"5"},{"shot":"1D-07","plan":"BP","move":"TAKİP (pedala basış)","action":"Ahmet pedala basar, ilerler.","audio":"AHMET: “Cesaret. Ama o yolda gelir.”","sec":"4"}]}]},{"title":"2. PERDE","scenes":[{"code":"2A","header":"DIŞ. İSTANBUL SOKAKLARI — GÜNDÜZ (2. Perde)","duration":"~1:35","shots":[{"shot":"2A-01","plan":"GP","move":"SABİT","action":"İki velosipet yan yana, eğimli sokak. Ahmet ışıl ışıl, Rıfkı idam sehpasındaymış gibi.","audio":"AHMET: “Yarışalım mı? İlk rıhtıma varan—”","sec":"7"},{"shot":"2A-02","plan":"YP","move":"SABİT","action":"Rıfkı itiraz edemeden.","audio":"RIFKI: “Hayır. Kesinlikle ha—”","sec":"4"},{"shot":"2A-03","plan":"BP","move":"WHIP PAN","action":"Ahmet çoktan fırlamıştır; Rıfkı homurdanıp peşine düşer.","audio":"SFX: fırlayış","sec":"4"},{"shot":"2A-04","plan":"BEL","move":"TAKİP (yan DOLLY)","action":"Ahmet akıcı, Rıfkı gıcır; heybeler zıplar, ekmek fırlayıp kediye çarpar.","audio":"RIFKI: “Bu yarış değil, kontrolsüz bir felaket!”","sec":"9"},{"shot":"2A-05","plan":"GP","move":"SABİT (reveal)","action":"Daracık ara sokak; iki balkon arasında çamaşır ipi.","audio":"SFX: gerilim","sec":"4"},{"shot":"2A-06","plan":"BEL","move":"TAKİP","action":"İkisi eğilir; Rıfkı'nın heybesi ipe takılır, çamaşırlar havalanır.","audio":"SFX: gıcırtı, savruluş","sec":"5"},{"shot":"2A-07","plan":"YP","move":"SABİT (komik)","action":"Beyaz çarşaf Ahmet'in başına geçer, onu hayalete çevirir.","audio":"AHMET: “Görmüyorum! Rıfkı, neredesin?” / RIFKI: “Ben de bir don giydim galiba!”","sec":"8"},{"shot":"2A-08","plan":"GP","move":"Hızlı kesmeler","action":"Ürken tavuk sürüsü dağılır; iki velosipet birbirine girer.","audio":"SFX: tavuk, çarpışma","sec":"7"},{"shot":"2A-09","plan":"GP","move":"SABİT","action":"İkisi yumuşak bir SAMAN ARABASINA yuvarlanır; toz, tüy, saman uçuşur.","audio":"SFX: poff, toz","sec":"7"},{"shot":"2A-10","plan":"BEL","move":"SABİT","action":"Samanların arasından iki baş çıkar; birbirine bakıp gülmeye başlarlar.","audio":"RIFKI: “Bu tam bir felaketti.” / AHMET: “En iyi yarışlar felakettir.”","sec":"9"},{"shot":"2A-11","plan":"DETAY","move":"SABİT","action":"Zil saman yığınına konar, başına saman çöpü takılır.","audio":"ZİL: “Tıngır.”","sec":"4"},{"shot":"2A-12","plan":"BP","move":"SABİT (afiş reveal)","action":"Doğrulurken karşı duvarda gösterişli afiş: kabarık göğüs, dev şampiyon madalyası, kupa.","audio":"SFX: vurgu","sec":"5"},{"shot":"2A-13","plan":"DETAY","move":"ZOOM-IN","action":"Afiş yazısı: “BURSA ŞAMPİYONU — FİYAKALI FUAT.”","audio":"—","sec":"4"},{"shot":"2A-14","plan":"YP","move":"SABİT","action":"Rıfkı afişe bakar.","audio":"RIFKI: “Adamın madalyası bile ayrıca yarışmış gibi.”","sec":"5"},{"shot":"2A-15","plan":"BEL","move":"SABİT","action":"Ahmet omuz silker, geçerler.","audio":"AHMET: “Onda kupa var, bizde defter.”","sec":"5"},{"shot":"2A-16","plan":"DETAY","move":"SABİT (ima)","action":"Afişteki Fuat sanki bir an göz kırpar gibidir.","audio":"SFX: minik parıltı","sec":"4"}]},{"code":"2B","header":"DIŞ. GALATA RIHTIMI — GÜNDÜZ (2. Perde)","duration":"~1:20","shots":[{"shot":"2B-01","plan":"GP","move":"SABİT (geniş)","action":"Rıhtım curcunası: hamallar, küfeler, satıcılar, martılar; iskelede koca VAPUR, bacasında duman.","audio":"SFX: rıhtım, martı, derin düdük","sec":"8"},{"shot":"2B-02","plan":"BEL","move":"SABİT","action":"Ahmet defteri açıp ufka bakar.","audio":"AHMET: “‘Beyaz kelebekler suda uçar…’ Demek cevabı denizde aramamız lazım.”","sec":"9"},{"shot":"2B-03","plan":"YP","move":"SABİT","action":"Rıfkı kuru bir gerçeklikle.","audio":"RIFKI: “Gördüğüm tek şey, bizsiz gitmek üzere olan koca bir vapur.”","sec":"7"},{"shot":"2B-04","plan":"GP","move":"TILT/PAN","action":"Vapur düdüğü öter; görevli merdiveni çekmeye başlar, el sallar.","audio":"GÖREVLİ: “Son yolcular! Vapur kalkıyooor!” / SFX: düdük","sec":"7"},{"shot":"2B-05","plan":"BEL","move":"SABİT (sarsma)","action":"Rıfkı panikle Ahmet'i sarsar.","audio":"RIFKI: “İki velosipet, bir haftalık börek ve bir kuşla o gemiye nasıl bineceğiz? NASIL?”","sec":"9"},{"shot":"2B-06","plan":"YP","move":"DOLLY-IN","action":"Ahmet'in gözleri delice parlar.","audio":"AHMET: “Hesabı… basit.”","sec":"5"},{"shot":"2B-07","plan":"YP","move":"SABİT","action":"Rıfkı dehşetle.","audio":"RIFKI: “Hayır, sakın ‘basit’ deme! Ne zaman desen, ben bir yerden düşüyorum—”","sec":"8"}]}]},{"title":"3. PERDE — DORUK","scenes":[{"code":"3A","header":"DIŞ. RIHTIM — DEVAM (3. Perde — Doruk)","duration":"~1:15","shots":[{"shot":"3A-01","plan":"BP","move":"Hızlı kesmeler / TAKİP","action":"Telaşlı müzik. Ahmet bir kalası el arabasına dayar — bir rampa doğar.","audio":"MÜZİK: tempolu / SFX: tahta","sec":"7"},{"shot":"3A-02","plan":"BEL","move":"SABİT","action":"Rıfkı bakar, anlar, dehşetle başını sallar, sonra heybeleri omuzlar.","audio":"AHMET: “Sen at, ben düzenlerim! Güverteye!”","sec":"7"},{"shot":"3A-03","plan":"YP","move":"SABİT","action":"Rıfkı börek torbası fırlatırken.","audio":"RIFKI: “Bu böreklere bir şey olursa, yemin ederim—”","sec":"5"},{"shot":"3A-04","plan":"GP","move":"TAKİP (yay hareketi)","action":"Heybeler havada uçar; güvertede şaşkın denizci yakalar.","audio":"DENİZCİ: “Hop! Ooh! Bu da ne!”","sec":"8"},{"shot":"3A-05","plan":"DETAY","move":"TAKİP","action":"Zil önden uçup bir halatın ucunu gagasıyla tutar, rampayı sabitler.","audio":"ZİL: “Tıngır!” / SFX: gergin halat","sec":"5"},{"shot":"3A-06","plan":"BP","move":"TAKİP","action":"Bisikletler rampadan fırlayıp güverteye konar.","audio":"SFX: tekerlek, iniş","sec":"5"},{"shot":"3A-07","plan":"GP","move":"SABİT (reveal)","action":"Sıra Rıfkı'da; ama vapur ayrılır, arada karanlık su şeridi açılır, genişler.","audio":"SFX: motor, su","sec":"7"},{"shot":"3A-08","plan":"YP","move":"SABİT","action":"Rıfkı kenarda donakalır.","audio":"RIFKI: “Açıldı! Su açıldı! Ben bunu atlayamam Ahmet!”","sec":"7"},{"shot":"3A-09","plan":"OMUZ","move":"SABİT (Ahmet POV'a yakın)","action":"Ahmet güverte kenarına koşar, elini uzatır.","audio":"AHMET: “Atlayabilirsin! Bana güven! Bir…”","sec":"7"},{"shot":"3A-10","plan":"YP","move":"Hızlı kesme","action":"Rıfkı.","audio":"RIFKI: “Atlamıyorum!” / AHMET: “İki…” / RIFKI: “Kesinlikle atlamıyorum!”","sec":"7"},{"shot":"3A-11","plan":"BP","move":"SABİT","action":"Ahmet kararlı.","audio":"AHMET: “ÜÇ!”","sec":"3"},{"shot":"3A-12","plan":"GP","move":"YAVAŞ ÇEKİM","action":"Rıfkı gözlerini kapatıp atlar; havada sonsuz gibi asılı kalır.","audio":"SFX: nefes, gerilim","sec":"5"},{"shot":"3A-13","plan":"GP","move":"SABİT","action":"Ahmet elini tutar, Zil arkadan iter; üçü bir yığın hâlinde güverteye yuvarlanır.","audio":"SFX: gümbürtü, ‘oof’","sec":"7"}]},{"code":"3B","header":"DIŞ. VAPUR GÜVERTESİ — DEVAM (3. Perde — Doruk)","duration":"~1:20","shots":[{"shot":"3B-01","plan":"GP","move":"Üst açı","action":"Üst üste yığılmışlar, soluk soluğa; çevrede şaşkın yolcular, devrik şapka, dönen tüy.","audio":"SFX: soluk, yolcu mırıltısı","sec":"7"},{"shot":"3B-02","plan":"YP","move":"SABİT","action":"Rıfkı yerden, gözleri kapalı.","audio":"RIFKI: “Atladım mı? Yaşıyor muyum?”","sec":"5"},{"shot":"3B-03","plan":"OMUZ","move":"SABİT","action":"Ahmet sırıtır.","audio":"AHMET: “İkisi de evet. Gördün mü Rıfkı? Ekip olduk!”","sec":"7"},{"shot":"3B-04","plan":"BEL","move":"SABİT","action":"Rıfkı doğrulur, toparlanır.","audio":"RIFKI: “Ekip mi? Sen beni resmen gemiye fırlattın.”","sec":"7"},{"shot":"3B-05","plan":"YP","move":"SABİT","action":"Ahmet neşeyle.","audio":"AHMET: “Ekip işte. Biri fırlatır, biri uçar.”","sec":"5"},{"shot":"3B-06","plan":"YP","move":"DOLLY-IN (yumuşak)","action":"Rıfkı ister istemez gülümser.","audio":"RIFKI: “Bu iş bende iyi durmuyor… ama fena da değildi.”","sec":"8"},{"shot":"3B-07","plan":"GP","move":"SABİT","action":"İkisi gülüşür; arkada İstanbul kaymaya başlar.","audio":"MÜZİK: sıcak tını","sec":"5"}]}]},{"title":"KAPANIŞ","scenes":[{"code":"K","header":"DIŞ. VAPUR GÜVERTESİ — BİRAZ SONRA (Kapanış + Çıkış)","duration":"~1:30","shots":[{"shot":"K-01","plan":"GP","move":"SABİT (geniş)","action":"Vapur açık denize ilerler; İstanbul silüeti gerilerde küçülür.","audio":"SFX: deniz, motor","sec":"7"},{"shot":"K-02","plan":"OMUZ","move":"SABİT","action":"Ahmet küpeşteye yaslanmış, defterdeki bilmeceye bakar; Rıfkı bir böreği koruyarak gelir.","audio":"RIFKI: “Çözebildin mi şu ‘suda uçan kelebek’ işini?”","sec":"8"},{"shot":"K-03","plan":"YP","move":"SABİT","action":"Ahmet fısıltıyla.","audio":"AHMET: “Henüz değil. Ama buralarda bir yerde cevabı var. Hissediyorum.”","sec":"8"},{"shot":"K-04","plan":"GP","move":"YAVAŞ PAN (ufuk)","action":"Ufukta beyaz üçgenler belli belirsiz titreşir (yelkenler); daha uzakta sis ardında karlı DAĞ DORUĞU bir an parıldar.","audio":"MÜZİK: gizem motifi (yarım)","sec":"8"},{"shot":"K-05","plan":"BEL","move":"SABİT (ani)","action":"Zil huzursuzlanır, tüyleri kabarır, başını rıhtıma çevirir.","audio":"ZİL: “Tıngır! Tıngır!”","sec":"5"},{"shot":"K-06","plan":"GP","move":"HIZLI DÖNÜŞ (kuşun POV yönü)","action":"Kamera kuşun baktığı yöne döner: gerilerde, kalabalıkta kıpırtısız PELERİNLİ figür; yüzü kapüşonda, onlara bakıyor.","audio":"MÜZİK: gizem vurgusu","sec":"8"},{"shot":"K-07","plan":"YP","move":"SABİT","action":"Rıfkı ürpererek Ahmet'in kolunu çeker.","audio":"RIFKI: “Ahmet, şu adam! İşte o adam, sana demiştim!”","sec":"7"},{"shot":"K-08","plan":"GP","move":"WHIP PAN","action":"Ahmet hızla döner — figür gitmiştir; yalnızca kalabalık ve boş rıhtım.","audio":"SFX: kalabalık","sec":"5"},{"shot":"K-09","plan":"YP","move":"SABİT","action":"Ahmet kaşları çatık.","audio":"AHMET: “…Hangi adam, Rıfkı?”","sec":"5"},{"shot":"K-10","plan":"GP","move":"YAVAŞ DOLLY-OUT","action":"Rıfkı defterine sokulur; Zil hâlâ rıhtıma bakar; deniz vapuru bilinmeze taşır.","audio":"MÜZİK: motif yükselir","sec":"8"},{"shot":"K-11","plan":"—","move":"KARARMA","action":"Kararma. “GELECEK BÖLÜM: Beyaz Kelebekler.”","audio":"MÜZİK: kapanış","sec":"5"}]}]}]};
+const SLOTS=[{key:'first',label:'İlk Kare',kind:'image'},{key:'last',label:'Son Kare',kind:'image'},{key:'video',label:'Video',kind:'video'}];
+const EDIT_FIELDS=['plan','move','action','audio','sec'];
+const NOTE_FIELDS=[
+  {key:'note', label:'✎ Çekim Notu', cls:'note',  ph:'Genel not, yönetmen aklında kalsın…'},
+  {key:'first',label:'◳ İlk Kare — Prompt', cls:'first', ph:'İlk kareyi üretmek/çizdirmek için prompt…'},
+  {key:'last', label:'◳ Son Kare — Prompt', cls:'last',  ph:'Son kareyi üretmek/çizdirmek için prompt…'},
+  {key:'video',label:'▷ Video — Not', cls:'video', ph:'Hareket, geçiş, video promptu…'},
+];
+
+const BASE={}, ORIG_SCENE={};
+STORYBOARD.acts.forEach(a=>a.scenes.forEach(s=>s.shots.forEach(sh=>{BASE[sh.shot]={...sh};ORIG_SCENE[sh.shot]=s.code;})));
+
+/* ===================== Supabase ===================== */
+const SUPABASE_URL='https://ncwqfcpmgypawmnfocan.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jd3FmY3BtZ3lwYXdtbmZvY2FuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMTQwMzQsImV4cCI6MjA5Nzg5MDAzNH0.VezaMHpUjLZjQKCWa8tM6Mk4eyQV052hx6w-itwyJLI';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const MEDIA_BUCKET='media';
+
+async function openDB(){const {error}=await sb.from('edits').select('id').limit(1);if(error)throw error;}
+async function idbPut(table,val){const row={...val,updated_at:new Date().toISOString()};const {error}=await sb.from(table).upsert(row);if(error)throw error;}
+async function idbDel(table,id){const {error}=await sb.from(table).delete().eq('id',id);if(error)throw error;}
+async function idbAll(table){const {data,error}=await sb.from(table).select('*');if(error)throw error;return data||[];}
+
+/* satır kaynaklı yazmaları, kendi realtime yankımızı görmezden gelmek için işaretliyoruz */
+const localEcho=new Map();
+function markLocal(id){localEcho.set(id,Date.now());}
+function isLocalEcho(id){const t=localEcho.get(id);return t!=null&&(Date.now()-t<2500);}
+
+/* ===================== Durum ===================== */
+const mediaState={};   // id -> {first,last,video}
+const noteState={};    // id -> {note,first,last,video}
+const editState={};    // origId -> {plan?,...}
+const customState={};  // customId -> {id,scene,after,order,code,plan,move,action,audio,sec}
+function publicUrl(path){if(!path)return null;return sb.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl;}
+
+/* ===================== Yardımcı ===================== */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1900);}
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function cssEsc(s){return (window.CSS&&CSS.escape)?CSS.escape(s):String(s).replace(/["\\]/g,'\\$&');}
+function isCustom(id){return !!customState[id];}
+function getShot(id){
+  if(customState[id]){const c=customState[id];return {code:c.code,plan:c.plan||'',move:c.move||'',action:c.action||'',audio:c.audio||'',sec:c.sec||'',isCustom:true};}
+  const b=BASE[id]||{},e=editState[id]||{};
+  return {code:id,plan:e.plan??b.plan??'',move:e.move??b.move??'',action:e.action??b.action??'',audio:e.audio??b.audio??'',sec:e.sec??b.sec??'',isCustom:false};
+}
+function sceneOf(id){return customState[id]?customState[id].scene:ORIG_SCENE[id];}
+function notesOf(id){return noteState[id]||{};}
+function noteCount(id){const n=notesOf(id);return NOTE_FIELDS.filter(f=>(n[f.key]||'').trim()).length;}
+
+function makePoster(file){return new Promise(res=>{
+  const url=URL.createObjectURL(file);const v=document.createElement('video');
+  v.muted=true;v.playsInline=true;v.preload='metadata';v.src=url;let done=false;
+  const fin=b=>{if(done)return;done=true;URL.revokeObjectURL(url);res(b);};
+  v.onloadeddata=()=>{try{v.currentTime=Math.min(0.6,(v.duration||2)/3);}catch(e){fin(null);}};
+  v.onseeked=()=>{try{const w=240,h=Math.max(1,Math.round(w*((v.videoHeight||9)/(v.videoWidth||16))));
+    const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(v,0,0,w,h);
+    c.toBlob(b=>fin(b),'image/jpeg',0.82);}catch(e){fin(null);}};
+  v.onerror=()=>fin(null);setTimeout(()=>fin(null),4000);});}
+
+/* ===================== Sıralama ===================== */
+function customsAfter(anchorId){return Object.values(customState).filter(c=>c.after===anchorId).sort((a,b)=>(a.order||0)-(b.order||0));}
+function orderedIds(scene){
+  const out=[];
+  const append=id=>{out.push(id);customsAfter(id).forEach(c=>append(c.id));};
+  scene.shots.forEach(sh=>append(sh.shot));
+  return out;
+}
+
+/* ===================== Render ===================== */
+function build(){
+  const board=$('#board');board.innerHTML='';
+  STORYBOARD.acts.forEach((act,ai)=>{
+    const a=document.createElement('div');a.className='act';
+    a.innerHTML=`<span class="lead">${String(ai+1).padStart(2,'0')}</span><h2>${esc(act.title)}</h2><div class="rule"></div>`;
+    board.appendChild(a);
+    act.scenes.forEach(scene=>{
+      const sc=document.createElement('section');sc.className='scene';sc.dataset.scene=scene.code;
+      sc.innerHTML=`<div class="scene-head"><span class="code">${esc(scene.code)}</span>
+        <span class="loc">${esc(scene.header)}</span>
+        <span class="mini" data-scene-mini="${esc(scene.code)}"></span>
+        <span class="dur">${esc(scene.duration||'')}</span></div>
+        <div class="colhead"><div>Çekim</div><div>Plan</div><div>Aksiyon · Açı / Hareket · Ses</div>
+        <div class="media-h"><span>İlk Kare</span><span>Son Kare</span><span>Video</span></div><div></div></div>`;
+      orderedIds(scene).forEach(id=>{const r=rowEl(id);sc.appendChild(r);wireRow(r);});
+      board.appendChild(sc);
+    });
+  });
+}
+
+function rowEl(id){
+  const s=getShot(id);
+  const row=document.createElement('div');row.className='shot'+(s.isCustom?' custom':'');row.dataset.shot=id;
+  const ed=(f,extra='')=>`class="editable ${extra}" contenteditable="true" data-edit="${f}" spellcheck="false"`;
+  const codeCell=s.isCustom
+    ? `<span class="editmark" ${ed('code')} data-ph="kod" data-single="1">${esc(s.code)}</span><span class="newtag">yeni</span>`
+    : `<span class="editmark">${esc(id)}</span>`;
+  row.innerHTML=`
+    <div class="c-code">${codeCell}</div>
+    <div class="c-plan">
+      <span class="tag" ${ed('plan')} data-ph="—" data-single="1">${esc(s.plan)}</span>
+      <span class="sec"><span ${ed('sec')} data-ph="–" data-single="1">${esc(s.sec)}</span> sn</span>
+    </div>
+    <div class="c-body">
+      <div class="move" ${ed('move')} data-ph="açı / hareket…" data-single="1">${esc(s.move)}</div>
+      <div class="action" ${ed('action')} data-ph="aksiyon / kadraj…">${esc(s.action)}</div>
+      <div class="audio" ${ed('audio')} data-ph="replik / ses…">${esc(s.audio)}</div>
+    </div>
+    <div class="c-media">${SLOTS.map(sl=>slotCellHTML(id,sl)).join('')}</div>
+    <div class="c-note">
+      <button class="noteBtn" title="Not & promptlar" data-note="${esc(id)}" data-focus="note">
+        <svg viewBox="0 0 22 28"><path class="body" d="M11 1 C 11 1, 20 12, 20 19 A 9 9 0 1 1 2 19 C 2 12, 11 1, 11 1 Z"/></svg>
+        <span class="cnt">0</span>
+      </button>
+    </div>
+    <button class="row-add" title="Bu çekimin altına yeni çekim ekle">+</button>
+    <div class="note-row" data-noterow="${esc(id)}">
+      <div class="inner">
+        <div class="np-grid">
+          ${NOTE_FIELDS.map(f=>`<div class="np-field ${f.cls}">
+            <label>${f.label}</label>
+            <textarea data-noteinput="${esc(id)}" data-field="${f.key}" placeholder="${esc(f.ph)}"></textarea>
+          </div>`).join('')}
+        </div>
+        <div class="np-foot">
+          <span class="saved" data-savestate="${esc(id)}"></span>
+          <span class="spacer"></span>
+          ${s.isCustom
+            ? `<button class="np-delete" data-delete="${esc(id)}">🗑 Bu çekimi sil</button>`
+            : `<button class="np-reset" data-reset="${esc(id)}" hidden>↺ Metni özgün haline döndür</button>`}
+        </div>
+      </div>
+    </div>`;
+  if(!s.isCustom)applyEditedFlag(row,id);
+  return row;
+}
+
+function slotCellHTML(shotId,sl){
+  const ic=sl.kind==='video'
+    ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#aeb8bf" stroke-width="1.6"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 9l5-3v12l-5-3"/></svg>'
+    : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#aeb8bf" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-4 4-2-2-7 7"/></svg>';
+  const tabLbl=sl.kind==='video'?'not':'prompt';
+  return `<div class="slot-cell">
+    <div class="slot ${sl.kind==='video'?'video':''}" data-slot="${sl.key}" data-shot="${esc(shotId)}" data-kind="${sl.kind}" title="${sl.label} — sürükle-bırak ya da tıkla">
+      <div class="ph">${ic}<span>${sl.label}</span></div>
+      <button class="kill" title="Kaldır">✕</button>
+    </div>
+    <button class="slot-tab" data-opennote="${esc(shotId)}" data-field="${sl.key}" title="${sl.label} için ${tabLbl}">
+      <span class="dot"></span>${tabLbl}
+    </button>
+  </div>`;
+}
+
+function paintSlot(el){
+  const shot=el.dataset.shot,key=el.dataset.slot,rec=mediaState[shot]&&mediaState[shot][key];
+  el.querySelectorAll('img.thumb,video.thumb,.play,.tlabel').forEach(n=>n.remove());
+  if(rec){
+    el.classList.add('filled');const lbl=SLOTS.find(s=>s.key===key).label;
+    const img=document.createElement('img');img.className='thumb';img.src=(el.dataset.kind==='video')?(rec.posterUrl||rec.url):rec.url;el.prepend(img);
+    if(el.dataset.kind==='video'){const p=document.createElement('div');p.className='play';
+      p.innerHTML='<svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="rgba(194,84,48,.92)"/><path d="M10 8l6 4-6 4z" fill="#fff"/></svg>';el.appendChild(p);}
+    const tl=document.createElement('div');tl.className='tlabel';tl.textContent=lbl;el.appendChild(tl);
+  }else el.classList.remove('filled');
+}
+
+/* ===================== Metin kaydı ===================== */
+function applyEditedFlag(row,id){
+  if(isCustom(id))return;
+  const isEd=!!(editState[id]&&Object.keys(editState[id]).length);
+  row.classList.toggle('edited',isEd);
+  const rb=row.querySelector(`[data-reset="${cssEsc(id)}"]`);if(rb)rb.hidden=!isEd;
+  EDIT_FIELDS.forEach(f=>{const el=row.querySelector(`[data-edit="${f}"]`);if(el)el.classList.toggle('empty-field',!el.textContent.trim());});
+}
+async function saveShotText(id){
+  const row=$(`.shot[data-shot="${cssEsc(id)}"]`);if(!row)return;
+  const read=f=>{const el=row.querySelector(`[data-edit="${f}"]`);return el?el.textContent:'';};
+  markLocal(id);
+  if(isCustom(id)){
+    const c=customState[id];
+    EDIT_FIELDS.forEach(f=>c[f]=read(f));
+    c.code=(read('code').trim())||c.code;
+    await idbPut('shots',c);
+    EDIT_FIELDS.forEach(f=>{const el=row.querySelector(`[data-edit="${f}"]`);if(el)el.classList.toggle('empty-field',!el.textContent.trim());});
+  }else{
+    const diff={};EDIT_FIELDS.forEach(f=>{const v=read(f);if((v||'')!==(BASE[id][f]||''))diff[f]=v;});
+    if(Object.keys(diff).length){editState[id]=diff;await idbPut('edits',{id,...diff});}
+    else{delete editState[id];await idbDel('edits',id);}
+    applyEditedFlag(row,id);
+  }
+  refreshFilter();
+}
+async function resetEdit(id){
+  markLocal(id);
+  delete editState[id];await idbDel('edits',id);
+  const row=$(`.shot[data-shot="${cssEsc(id)}"]`);
+  EDIT_FIELDS.forEach(f=>{const el=row.querySelector(`[data-edit="${f}"]`);if(el)el.textContent=BASE[id][f]||'';});
+  applyEditedFlag(row,id);refreshFilter();toast(`${id} metni özgün haline döndü.`);
+}
+
+/* ===================== Çekim ekle / sil ===================== */
+function genCode(anchorId){
+  const base=getShot(anchorId).code;
+  const used=new Set($$('.shot').map(r=>getShot(r.dataset.shot).code));
+  for(let i=0;i<26;i++){const c=`${base}-${String.fromCharCode(65+i)}`;if(!used.has(c))return c;}
+  let n=1;let c;do{c=`${base}-${n++}`;}while(used.has(c));return c;
+}
+async function insertAfter(anchorId){
+  const id='cx_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const rec={id,scene:sceneOf(anchorId),after:anchorId,order:Date.now(),code:genCode(anchorId),plan:'',move:'',action:'',audio:'',sec:''};
+  markLocal(id);
+  customState[id]=rec;await idbPut('shots',rec);
+  build();applyState();
+  const row=$(`.shot[data-shot="${cssEsc(id)}"]`);
+  if(row){row.scrollIntoView({block:'center',behavior:'smooth'});const a=row.querySelector('[data-edit="action"]');if(a)a.focus();}
+  toast(`${rec.code} eklendi`);
+}
+async function deleteShot(id){
+  for(const ch of customsAfter(id))await deleteShot(ch.id);
+  markLocal(id);
+  for(const sl of SLOTS){
+    const rec=mediaState[id]&&mediaState[id][sl.key];
+    if(rec){const paths=[rec.storage_path,rec.poster_path].filter(Boolean);if(paths.length)await sb.storage.from(MEDIA_BUCKET).remove(paths);}
+    await idbDel('media',`${id}__${sl.key}`);
+  }
+  await idbDel('notes',id);await idbDel('shots',id);
+  delete customState[id];delete noteState[id];delete mediaState[id];
+}
+async function deleteShotConfirmed(id){
+  const code=getShot(id).code;
+  if(!confirm(`“${code}” çekimi ve ona eklediğin not/prompt/görseller silinsin mi? (Geri alınamaz)`))return;
+  await deleteShot(id);build();applyState();toast('Çekim silindi.');
+}
+
+/* ===================== Olaylar (satır bazlı) ===================== */
+function wireRow(row){
+  $$('.editable',row).forEach(el=>{
+    el.addEventListener('input',()=>{const id=el.closest('.shot').dataset.shot;
+      el.classList.toggle('empty-field',!el.textContent.trim());
+      clearTimeout(el._t);el._t=setTimeout(()=>saveShotText(id),450);});
+    el.addEventListener('keydown',e=>{if(el.dataset.single&&e.key==='Enter'){e.preventDefault();el.blur();}});
+    el.addEventListener('paste',e=>{e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text');document.execCommand('insertText',false,t);});
+  });
+  const nb=$('.noteBtn',row);if(nb)nb.addEventListener('click',()=>openNote(nb.dataset.note,nb.dataset.focus,true));
+  $$('.slot-tab',row).forEach(b=>b.addEventListener('click',()=>openNote(b.dataset.opennote,b.dataset.field,false)));
+  $$('textarea[data-noteinput]',row).forEach(ta=>{
+    ta.addEventListener('input',()=>{
+      const id=ta.dataset.noteinput,field=ta.dataset.field;
+      noteState[id]=noteState[id]||{};noteState[id][field]=ta.value;
+      const st=$(`[data-savestate="${cssEsc(id)}"]`);if(st)st.textContent='yazılıyor…';
+      clearTimeout(ta._t);ta._t=setTimeout(async()=>{
+        markLocal(id);
+        const obj={};NOTE_FIELDS.forEach(f=>{const v=(noteState[id][f.key]||'').trim();if(v)obj[f.key]=noteState[id][f.key];});
+        if(Object.keys(obj).length)await idbPut('notes',{id,...obj});else{await idbDel('notes',id);delete noteState[id];}
+        if(st){st.textContent='kaydedildi ✓';setTimeout(()=>st.textContent='',1300);}
+        refreshNoteBtn(id);refreshSlotTabs(id);refreshFilter();
+      },420);});
+  });
+  const rs=$('.np-reset',row);if(rs)rs.addEventListener('click',()=>resetEdit(rs.dataset.reset));
+  const dl=$('.np-delete',row);if(dl)dl.addEventListener('click',()=>deleteShotConfirmed(dl.dataset.delete));
+  const add=$('.row-add',row);if(add)add.addEventListener('click',()=>insertAfter(row.dataset.shot));
+  $$('.slot',row).forEach(el=>{
+    el.addEventListener('click',e=>{
+      if(e.target.classList.contains('kill')){e.stopPropagation();removeMedia(el);return;}
+      const shot=el.dataset.shot,key=el.dataset.slot;
+      if(mediaState[shot]&&mediaState[shot][key])openLightbox(el);else pickFor(el);});
+    ['dragenter','dragover'].forEach(ev=>el.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();el.classList.add('drag');}));
+    ['dragleave','dragend'].forEach(ev=>el.addEventListener(ev,e=>{e.preventDefault();el.classList.remove('drag');}));
+    el.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();el.classList.remove('drag');
+      const f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)acceptFile(el,f);});
+  });
+}
+
+function openNote(id,focusField,toggle){
+  const row=$(`.note-row[data-noterow="${cssEsc(id)}"]`);if(!row)return;
+  const isOpen=row.classList.contains('open');
+  if(toggle&&isOpen){row.classList.remove('open');return;}
+  row.classList.add('open');
+  if(focusField){const ta=row.querySelector(`textarea[data-field="${focusField}"]`);if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}}
+}
+
+/* dosya seç */
+let pendingSlot=null;
+function pickFor(el){pendingSlot=el;$(el.dataset.kind==='video'?'#pick-video':'#pick-image').click();}
+async function acceptFile(el,file){
+  const shot=el.dataset.shot,key=el.dataset.slot,kind=el.dataset.kind;
+  const ok=kind==='video'?/^video\//.test(file.type):/^image\//.test(file.type);
+  if(!ok){toast(kind==='video'?'Buraya video bırak.':'Buraya bir resim bırak.');return;}
+  toast('Yükleniyor…');
+  const id=`${shot}__${key}`,stamp=Date.now();
+  const storage_path=`${shot}/${key}/${stamp}_${file.name}`;
+  const {error:upErr}=await sb.storage.from(MEDIA_BUCKET).upload(storage_path,file,{contentType:file.type,upsert:true});
+  if(upErr){toast('Yükleme başarısız.');return;}
+  let poster_path=null;
+  if(kind==='video'){const poster=await makePoster(file);
+    if(poster){poster_path=`${shot}/${key}/${stamp}_poster.jpg`;
+      await sb.storage.from(MEDIA_BUCKET).upload(poster_path,poster,{contentType:'image/jpeg',upsert:true});}}
+  const rec={id,shot,slot:key,kind,name:file.name,type:file.type,storage_path,poster_path};
+  markLocal(id);
+  await idbPut('media',rec);attachRec(shot,key,rec);paintSlot(el);
+  updateOdo();refreshSceneMini();refreshFilter();toast(`${SLOTS.find(s=>s.key===key).label} eklendi · ${getShot(shot).code}`);
+}
+function attachRec(shot,key,rec){mediaState[shot]=mediaState[shot]||{};
+  mediaState[shot][key]={...rec,url:publicUrl(rec.storage_path),posterUrl:rec.poster_path?publicUrl(rec.poster_path):null};}
+async function removeMedia(el){
+  const shot=el.dataset.shot,key=el.dataset.slot,id=`${shot}__${key}`;
+  const rec=mediaState[shot]&&mediaState[shot][key];
+  markLocal(id);
+  if(rec){const paths=[rec.storage_path,rec.poster_path].filter(Boolean);if(paths.length)await sb.storage.from(MEDIA_BUCKET).remove(paths);}
+  await idbDel('media',id);if(mediaState[shot])delete mediaState[shot][key];
+  paintSlot(el);updateOdo();refreshSceneMini();refreshFilter();toast('Kaldırıldı.');
+}
+
+/* lightbox */
+let lbEl=null;
+function openLightbox(el){lbEl=el;const shot=el.dataset.shot,key=el.dataset.slot,rec=mediaState[shot][key];
+  const st=$('#lbStage');st.innerHTML='';
+  if(rec.kind==='video'){const v=document.createElement('video');v.src=rec.url;v.controls=true;v.autoplay=true;st.appendChild(v);}
+  else{const i=document.createElement('img');i.src=rec.url;st.appendChild(i);}
+  $('#lbName').textContent=`${getShot(shot).code} · ${SLOTS.find(s=>s.key===key).label} — ${rec.name||''}`;$('#lb').classList.add('open');}
+function closeLightbox(){$('#lb').classList.remove('open');$('#lbStage').innerHTML='';lbEl=null;}
+
+/* sayaç / mini / damla / sekmeler */
+function isFull(s){const m=mediaState[s];return m&&m.first&&m.last&&m.video;}
+function updateOdo(){const rows=$$('.shot');const d=rows.filter(r=>isFull(r.dataset.shot)).length;
+  $('#odoTotal').textContent=rows.length;$('#odoDone').textContent=d;
+  $('#odoBar').style.width=(rows.length?Math.round(d/rows.length*100):0)+'%';}
+function refreshSceneMini(){$$('.scene').forEach(sc=>{
+  const el=$('[data-scene-mini]',sc);if(!el)return;const rows=$$('.shot',sc);
+  const d=rows.filter(r=>isFull(r.dataset.shot)).length;
+  el.innerHTML=`<span class="dot ${d===rows.length&&rows.length?'full':''}"></span>${d}/${rows.length}`;});}
+function refreshNoteBtn(id){const b=$(`.noteBtn[data-note="${cssEsc(id)}"]`);if(!b)return;
+  const c=noteCount(id);b.classList.toggle('has',c>0);b.querySelector('.cnt').textContent=c;}
+function refreshSlotTabs(id){const n=notesOf(id);
+  $$(`.slot-tab[data-opennote="${cssEsc(id)}"]`).forEach(t=>t.classList.toggle('has',!!(n[t.dataset.field]||'').trim()));}
+
+/* filtre / arama */
+let curFilter='all';
+function refreshFilter(){
+  const q=$('#q').value.trim().toLocaleLowerCase('tr');
+  $$('.scene').forEach(sc=>{let vis=0;
+    $$('.shot',sc).forEach(row=>{const id=row.dataset.shot,m=getShot(id),n=notesOf(id);let ok=true;
+      if(curFilter==='todo'&&isFull(id))ok=false;
+      if(curFilter==='notes'&&noteCount(id)===0)ok=false;
+      if(ok&&q){const hay=[m.code,m.plan,m.move,m.action,m.audio,n.note,n.first,n.last,n.video,sc.dataset.scene].join(' ').toLocaleLowerCase('tr');
+        if(!hay.includes(q))ok=false;}
+      row.classList.toggle('dimmed',!ok);if(ok)vis++;});
+    sc.style.display=vis?'':'none';});
+  $$('.act').forEach(a=>{let n=a.nextElementSibling,any=false;
+    while(n&&!n.classList.contains('act')){if(n.classList.contains('scene')&&n.style.display!=='none')any=true;n=n.nextElementSibling;}
+    a.style.display=any?'':'none';});
+}
+
+/* yedek */
+async function doBackup(){
+  toast('Yedek hazırlanıyor…');
+  const notes=await idbAll('notes'),edits=await idbAll('edits'),shots=await idbAll('shots'),media=await idbAll('media');
+  const b64=b=>new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(b);});
+  const mediaOut=[];
+  for(const m of media){
+    const {data:blobData}=await sb.storage.from(MEDIA_BUCKET).download(m.storage_path);
+    let posterB64=null;
+    if(m.poster_path){const {data:pb}=await sb.storage.from(MEDIA_BUCKET).download(m.poster_path);if(pb)posterB64=await b64(pb);}
+    mediaOut.push({id:m.id,shot:m.shot,slot:m.slot,kind:m.kind,name:m.name,type:m.type,blob:blobData?await b64(blobData):null,poster:posterB64});
+  }
+  const payload={app:'velosipet-storyboard',ver:3,when:new Date().toISOString(),notes,edits,shots,media:mediaOut};
+  const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`velosipet_b01_yedek_${new Date().toISOString().slice(0,10)}.json`;a.click();toast('Yedek indirildi.');
+}
+async function doRestore(file){
+  try{const data=JSON.parse(await file.text());if(data.app!=='velosipet-storyboard')throw 0;
+    const toBlob=async d=>(await fetch(d)).blob();
+    for(const n of (data.notes||[])){const o={id:n.id};NOTE_FIELDS.forEach(ff=>{if(n[ff.key]!=null)o[ff.key]=n[ff.key];});if(n.text!=null&&o.note==null)o.note=n.text;await idbPut('notes',o);}
+    for(const ed of (data.edits||[]))await idbPut('edits',ed);
+    for(const sh of (data.shots||[]))await idbPut('shots',sh);
+    for(const m of (data.media||[])){
+      if(!m.blob){continue;}
+      const stamp=Date.now();
+      const storage_path=`${m.shot}/${m.slot}/${stamp}_${m.name||'dosya'}`;
+      await sb.storage.from(MEDIA_BUCKET).upload(storage_path,await toBlob(m.blob),{contentType:m.type,upsert:true});
+      let poster_path=null;
+      if(m.poster){poster_path=`${m.shot}/${m.slot}/${stamp}_poster.jpg`;
+        await sb.storage.from(MEDIA_BUCKET).upload(poster_path,await toBlob(m.poster),{contentType:'image/jpeg',upsert:true});}
+      await idbPut('media',{id:m.id,shot:m.shot,slot:m.slot,kind:m.kind,name:m.name,type:m.type,storage_path,poster_path});
+    }
+    toast('Yedek yüklendi, yenileniyor…');setTimeout(()=>location.reload(),700);
+  }catch(err){toast('Bu dosya okunamadı.');}
+}
+
+/* ===================== Global olaylar (tek sefer) ===================== */
+function wireGlobal(){
+  $('#filter').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+    $$('#filter button').forEach(x=>x.classList.remove('active'));b.classList.add('active');curFilter=b.dataset.f;refreshFilter();});
+  $('#q').addEventListener('input',refreshFilter);
+  $('#pick-image').addEventListener('change',e=>{const f=e.target.files[0];if(f&&pendingSlot)acceptFile(pendingSlot,f);e.target.value='';});
+  $('#pick-video').addEventListener('change',e=>{const f=e.target.files[0];if(f&&pendingSlot)acceptFile(pendingSlot,f);e.target.value='';});
+  $('#lbClose').addEventListener('click',closeLightbox);
+  $('#lb').addEventListener('click',e=>{if(e.target.id==='lb')closeLightbox();});
+  $('#lbRemove').addEventListener('click',async()=>{if(lbEl){await removeMedia(lbEl);closeLightbox();}});
+  $('#lbReplace').addEventListener('click',()=>{if(lbEl){const t=lbEl;closeLightbox();pickFor(t);}});
+  $('#lbDownload').addEventListener('click',()=>{if(!lbEl)return;const rec=mediaState[lbEl.dataset.shot][lbEl.dataset.slot];
+    const a=document.createElement('a');a.href=rec.url;a.download=rec.name||'dosya';a.click();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox();});
+  $('#backupBtn').addEventListener('click',doBackup);
+  $('#restoreBtn').addEventListener('click',()=>$('#restoreFile').click());
+  $('#restoreFile').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f)doRestore(f);});
+}
+
+/* ===================== Durumu uygula ===================== */
+function applyState(){
+  $$('.slot').forEach(paintSlot);
+  $$('textarea[data-noteinput]').forEach(ta=>{const n=notesOf(ta.dataset.noteinput);ta.value=(n[ta.dataset.field]!=null)?n[ta.dataset.field]:'';});
+  $$('.noteBtn').forEach(b=>refreshNoteBtn(b.dataset.note));
+  $$('.shot').forEach(r=>refreshSlotTabs(r.dataset.shot));
+  updateOdo();refreshSceneMini();refreshFilter();
+}
+
+async function loadState(){
+  (await idbAll('edits')).forEach(e=>{const o={};EDIT_FIELDS.forEach(f=>{if(e[f]!=null)o[f]=e[f];});editState[e.id]=o;});
+  (await idbAll('shots')).forEach(s=>{customState[s.id]={id:s.id,scene:s.scene,after:s.after,order:s.order||0,code:s.code||s.id,
+    plan:s.plan||'',move:s.move||'',action:s.action||'',audio:s.audio||'',sec:s.sec||''};});
+  (await idbAll('media')).forEach(m=>attachRec(m.shot,m.slot,m));
+  (await idbAll('notes')).forEach(n=>{const o={};NOTE_FIELDS.forEach(f=>{if(n[f.key]!=null)o[f.key]=n[f.key];});if(n.text!=null&&o.note==null)o.note=n.text;noteState[n.id]=o;});
+}
+
+/* ===================== Realtime (ekip senkronizasyonu) ===================== */
+function rerenderRow(id){
+  const row=$(`.shot[data-shot="${cssEsc(id)}"]`);if(!row)return;
+  if(document.activeElement&&row.contains(document.activeElement))return;
+  const s=getShot(id);
+  EDIT_FIELDS.forEach(f=>{const el=row.querySelector(`[data-edit="${f}"]`);if(el){el.textContent=s[f];el.classList.toggle('empty-field',!el.textContent.trim());}});
+  applyEditedFlag(row,id);refreshFilter();
+}
+function refreshNoteRowUI(id){
+  const row=$(`.note-row[data-noterow="${cssEsc(id)}"]`);if(!row)return;
+  const n=notesOf(id);
+  $$('textarea[data-noteinput]',row).forEach(ta=>{if(document.activeElement!==ta)ta.value=(n[ta.dataset.field]!=null)?n[ta.dataset.field]:'';});
+  refreshNoteBtn(id);refreshSlotTabs(id);refreshFilter();
+}
+function handleRealtime(table,payload){
+  const row=payload.new&&Object.keys(payload.new).length?payload.new:payload.old;
+  if(!row)return;
+  const id=row.id;
+  if(isLocalEcho(id))return;
+  if(table==='edits'){
+    if(payload.eventType==='DELETE')delete editState[id];
+    else{const o={};EDIT_FIELDS.forEach(f=>{if(row[f]!=null)o[f]=row[f];});editState[id]=o;}
+    rerenderRow(id);
+  }else if(table==='shots'){
+    if(payload.eventType==='DELETE')delete customState[id];
+    else customState[id]={id:row.id,scene:row.scene,after:row.after,order:row.order||0,code:row.code||row.id,plan:row.plan||'',move:row.move||'',action:row.action||'',audio:row.audio||'',sec:row.sec||''};
+    build();applyState();
+  }else if(table==='notes'){
+    if(payload.eventType==='DELETE')delete noteState[id];
+    else{const o={};NOTE_FIELDS.forEach(f=>{if(row[f.key]!=null)o[f.key]=row[f.key];});noteState[id]=o;}
+    refreshNoteRowUI(id);
+  }else if(table==='media'){
+    const shot=row.shot,slot=row.slot;
+    if(!shot||!slot)return;
+    if(payload.eventType==='DELETE'){if(mediaState[shot])delete mediaState[shot][slot];}
+    else attachRec(shot,slot,row);
+    const el=$(`.slot[data-shot="${cssEsc(shot)}"][data-slot="${cssEsc(slot)}"]`);
+    if(el)paintSlot(el);
+    updateOdo();refreshSceneMini();refreshFilter();
+  }
+}
+function subscribeRealtime(){
+  ['edits','shots','notes','media'].forEach(table=>{
+    sb.channel(`rt:${table}`)
+      .on('postgres_changes',{event:'*',schema:'public',table},payload=>handleRealtime(table,payload))
+      .subscribe();
+  });
+}
+
+(async function init(){
+  try{await openDB();}catch(e){$('#board').innerHTML='<div class="empty-note">Supabase bağlantısı kurulamadı. SUPABASE_URL / SUPABASE_ANON_KEY değerlerini ve internet bağlantısını kontrol et.</div>';return;}
+  await loadState();
+  build();
+  wireGlobal();
+  applyState();
+  subscribeRealtime();
+})();
+</script>
+</body>
+</html>
