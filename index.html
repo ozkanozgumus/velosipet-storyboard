@@ -457,16 +457,25 @@ async function deleteShot(id){
   markLocal(id);
   for(const sl of SLOTS){
     const rec=mediaState[id]&&mediaState[id][sl.key];
-    if(rec){const paths=[rec.storage_path,rec.poster_path].filter(Boolean);if(paths.length)await sb.storage.from(MEDIA_BUCKET).remove(paths);}
-    await idbDel('media',`${id}__${sl.key}`);
+    if(rec){
+      const paths=[rec.storage_path,rec.poster_path].filter(Boolean);
+      if(paths.length){const {error:rmErr}=await sb.storage.from(MEDIA_BUCKET).remove(paths);if(rmErr)console.warn('Storage sil:',rmErr);}
+    }
+    try{await idbDel('media',`${id}__${sl.key}`);}catch(e){console.warn('media sil:',e);}
   }
-  await idbDel('notes',id);await idbDel('shots',id);
+  try{await idbDel('notes',id);}catch(e){console.warn('notes sil:',e);}
+  try{await idbDel('shots',id);}catch(e){console.warn('shots sil:',e);}
   delete customState[id];delete noteState[id];delete mediaState[id];
 }
 async function deleteShotConfirmed(id){
   const code=getShot(id).code;
-  if(!confirm(`“${code}” çekimi ve ona eklediğin not/prompt/görseller silinsin mi? (Geri alınamaz)`))return;
-  await deleteShot(id);build();applyState();toast('Çekim silindi.');
+  if(!confirm(`"${code}" çekimi ve ona eklediğin not/prompt/görseller silinsin mi? (Geri alınamaz)`))return;
+  try{
+    await deleteShot(id);build();applyState();toast('Çekim silindi.');
+  }catch(err){
+    console.error('Silme hatası:',err);
+    toast('Silme sırasında hata oluştu — konsolu kontrol et.');
+  }
 }
 
 /* ===================== Olaylar (satır bazlı) ===================== */
